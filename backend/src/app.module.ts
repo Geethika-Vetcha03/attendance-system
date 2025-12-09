@@ -12,14 +12,14 @@ import { NotificationsModule } from './modules/notifications/notifications.modul
 @Module({
   imports: [
     TypeOrmModule.forRoot({
-      type: 'postgres',
-      url: process.env.DATABASE_URL,
-      autoLoadEntities: true,
-      synchronize: true,
-      ssl: {
-        rejectUnauthorized: false,
-      },
-    }),
+  type: 'postgres',
+  url: process.env.DATABASE_URL,
+  autoLoadEntities: true,
+  synchronize: true,
+  ssl: {
+    rejectUnauthorized: false,
+  },
+}),
     AuthModule,
     UsersModule,
     ClassesModule,
