@@ -6,7 +6,7 @@ export default function Login() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
-  const { login, logout, user } = useAuth();
+  const { login, user } = useAuth();
   const navigate = useNavigate();
 
   // Redirect logged-in users to dashboard
