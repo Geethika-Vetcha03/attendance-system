@@ -13,13 +13,12 @@ import { NotificationsModule } from './modules/notifications/notifications.modul
   imports: [
     TypeOrmModule.forRoot({
       type: 'postgres',
-      host: 'localhost',
-      port: 5432,
-      username: 'postgres',
-      password: 'geethu2626',
-      database: 'postgres',   
+      url: process.env.DATABASE_URL,
       autoLoadEntities: true,
       synchronize: true,
+      ssl: {
+        rejectUnauthorized: false,
+      },
     }),
     AuthModule,
     UsersModule,
