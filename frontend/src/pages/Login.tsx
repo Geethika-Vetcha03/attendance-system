@@ -9,7 +9,12 @@ export default function Login() {
   const { login, user } = useAuth();
   const navigate = useNavigate();
 
-  // Redirect logged-in users to dashboard
+  // Clear any stale tokens and redirect logged-in users
+  useEffect(() => {
+    // Clear old token to ensure fresh login
+    localStorage.removeItem('token');
+  }, []);
+  
   useEffect(() => {
     if (user) {
       navigate('/');
@@ -19,12 +24,15 @@ export default function Login() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError('');
+    console.log('Attempting login with:', { email, password: '***' });
     try {
       await login(email, password);
       // Force a full page reload to clear all cached component states
       window.location.href = '/';
-    } catch {
-      setError('Invalid email or password');
+    } catch (err: any) {
+      console.error('Login error:', err);
+      const message = err.response?.data?.message || err.message || 'Invalid email or password';
+      setError(message);
     }
   };
 
@@ -49,11 +57,7 @@ export default function Login() {
             Sign In →
           </button>
         </form>
-        <div style={{ marginTop: '30px', padding: '20px', background: 'linear-gradient(135deg, #f0f9ff, #e0f2fe)', borderRadius: '14px', textAlign: 'center' }}>
-          <p style={{ color: '#0369a1', fontSize: '12px', fontWeight: '600', marginBottom: '8px' }}>🔑 Demo Credentials</p>
-          <p style={{ color: '#0c4a6e', fontSize: '13px' }}>admin@school.com / admin123</p>
-        </div>
-        <p className="text-center" style={{ marginTop: '25px', fontSize: '14px' }}>
+        <p className="text-center" style={{ marginTop: '30px', fontSize: '14px' }}>
           Don't have an account? <Link to="/signup" style={{ color: '#6366f1', fontWeight: '600' }}>Sign up here →</Link>
         </p>
       </div>

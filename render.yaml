@@ -7,18 +7,27 @@ services:
     buildCommand: cd backend && npm install && npm run build
     startCommand: cd backend && npm run start:prod
     envVars:
-      - key: DATABASE_URL
-        scope: run
-        value: postgresql://...  # Set your DATABASE_URL in Render dashboard
       - key: NODE_ENV
         value: production
+      - key: DATABASE_URL
+        scope: run
+        value: postgresql://attendance_db_e541_user:Jv0mBOe4IgIxIi2Kj6p6hTuJH2vwHD0M@dpg-d4s84skhg0os73dfodlg-a/attendance_db_e541
+      - key: DATABASE_SSL
+        value: 'true'
+      - key: PORT
+        value: '3001'
+      - key: FRONTEND_URL
+        value: https://attendance-system-web.onrender.com
 
-  # Frontend React + Vite
+  # Frontend React + Vite (Static Site)
   - type: static
     name: attendance-system-web
     buildCommand: cd frontend && npm install && npm run build
     staticPublishPath: frontend/dist
+    pullRequestPreviewsEnabled: true
     envVars:
       - key: VITE_API_URL
         scope: build
-        value: https://attendance-system-o0i1.onrender.com  # Replace with your backend URL
+        value: https://attendance-system-api.onrender.com
+
+
