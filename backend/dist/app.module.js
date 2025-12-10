@@ -23,16 +23,39 @@ exports.AppModule = AppModule;
 exports.AppModule = AppModule = __decorate([
     (0, common_1.Module)({
         imports: [
-            typeorm_1.TypeOrmModule.forRoot({
-                type: 'postgres',
-                host: 'localhost',
-                port: 5432,
-                username: 'postgres',
-                password: 'geethu2626',
-                database: 'postgres',
-                autoLoadEntities: true,
-                synchronize: true,
-            }),
+            (() => {
+                const enableSsl = (() => {
+                    if (process.env.DATABASE_SSL && process.env.DATABASE_SSL.toLowerCase() === 'true')
+                        return true;
+                    if (process.env.DATABASE_URL && process.env.DATABASE_URL.includes('sslmode=require'))
+                        return true;
+                    if (process.env.NODE_ENV === 'production' && process.env.DATABASE_URL)
+                        return true;
+                    return false;
+                })();
+                try {
+                    const dbUrl = process.env.DATABASE_URL || '';
+                    let dbHost = '';
+                    if (dbUrl) {
+                        try {
+                            dbHost = new URL(dbUrl).hostname || '';
+                        }
+                        catch (e) {
+                            dbHost = '';
+                        }
+                    }
+                    console.log(`TypeORM SSL enabled: ${enableSsl} | DATABASE_URL present: ${!!dbUrl} | DB host: ${dbHost}`);
+                }
+                catch (e) {
+                }
+                return typeorm_1.TypeOrmModule.forRoot({
+                    type: 'postgres',
+                    url: process.env.DATABASE_URL,
+                    autoLoadEntities: true,
+                    synchronize: true,
+                    ssl: enableSsl ? { rejectUnauthorized: false } : false,
+                });
+            })(),
             auth_module_1.AuthModule,
             users_module_1.UsersModule,
             classes_module_1.ClassesModule,
