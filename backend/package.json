@@ -3,8 +3,8 @@
   "version": "1.0.0",
   "description": "Online Attendance Management System Backend",
   "scripts": {
-    "build": "nest build",
-    "start": "nest start",
+    "build": "npx nest build",
+    "start": "npx nest start",
     "start:dev": "nest start --watch",
     "start:prod": "node dist/main.js",
     "typeorm": "typeorm-ts-node-commonjs",
@@ -27,6 +27,7 @@
     "passport-jwt": "^4.0.1",
     "pdfkit": "^0.15.0",
     "pg": "^8.11.3",
+    "dotenv": "^16.1.4",
     "reflect-metadata": "^0.1.13",
     "rxjs": "^7.8.1",
     "typeorm": "^0.3.19"
