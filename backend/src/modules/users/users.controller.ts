@@ -10,7 +10,7 @@ export class UsersController {
   constructor(private usersService: UsersService) {}
 
   @Get()
-  @Roles(UserRole.ADMIN)
+  @Roles(UserRole.ADMIN, UserRole.TEACHER)
   findAll(@Query('role') role?: UserRole) {
     return this.usersService.findAll(role);
   }
@@ -45,7 +45,7 @@ export class UsersController {
   }
 
   @Put(':id/assign-class')
-  @Roles(UserRole.ADMIN)
+  @Roles(UserRole.ADMIN, UserRole.TEACHER)
   assignClass(@Param('id') id: string, @Body('classId') classId: string) {
     return this.usersService.assignClass(id, classId);
   }

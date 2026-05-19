@@ -47,7 +47,7 @@ let UsersController = class UsersController {
 exports.UsersController = UsersController;
 __decorate([
     (0, common_1.Get)(),
-    (0, roles_guard_1.Roles)(user_entity_1.UserRole.ADMIN),
+    (0, roles_guard_1.Roles)(user_entity_1.UserRole.ADMIN, user_entity_1.UserRole.TEACHER),
     __param(0, (0, common_1.Query)('role')),
     __metadata("design:type", Function),
     __metadata("design:paramtypes", [String]),
@@ -94,7 +94,7 @@ __decorate([
 ], UsersController.prototype, "remove", null);
 __decorate([
     (0, common_1.Put)(':id/assign-class'),
-    (0, roles_guard_1.Roles)(user_entity_1.UserRole.ADMIN),
+    (0, roles_guard_1.Roles)(user_entity_1.UserRole.ADMIN, user_entity_1.UserRole.TEACHER),
     __param(0, (0, common_1.Param)('id')),
     __param(1, (0, common_1.Body)('classId')),
     __metadata("design:type", Function),

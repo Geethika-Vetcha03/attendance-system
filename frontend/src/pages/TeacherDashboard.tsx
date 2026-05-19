@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import { Link, useSearchParams } from 'react-router-dom';
-import { classesApi, leaveApi, attendanceApi, authApi, usersApi } from '../services/api';
+import { classesApi, leaveApi, attendanceApi, usersApi } from '../services/api';
 import { Class, LeaveRequest, User } from '../types';
 
 interface StudentWithAttendance extends User {

@@ -1,5 +1,6 @@
 import { Routes, Route, Navigate } from 'react-router-dom';
 import { useAuth } from './context/AuthContext';
+import Welcome from './pages/Welcome';
 import Login from './pages/Login';
 import Signup from './pages/Signup';
 import AdminDashboard from './pages/AdminDashboard';
@@ -15,8 +16,8 @@ import Layout from './components/Layout';
 function PrivateRoute({ children, roles }: { children: JSX.Element; roles?: string[] }) {
   const { user, loading } = useAuth();
   if (loading) return <div className="container text-center">Loading...</div>;
-  if (!user) return <Navigate to="/login" />;
-  if (roles && !roles.includes(user.role)) return <Navigate to="/" />;
+  if (!user) return <Navigate to="/welcome" />;
+  if (roles && !roles.includes(user.role)) return <Navigate to="/dashboard" />;
   return children;
 }
 
@@ -24,12 +25,12 @@ export default function App() {
   const { user } = useAuth();
 
   const getDashboard = () => {
-    if (!user) return <Navigate to="/login" />;
+    if (!user) return <Navigate to="/welcome" />;
     switch (user.role) {
       case 'admin': return <AdminDashboard />;
       case 'teacher': return <TeacherDashboard />;
       case 'student': return <StudentDashboard />;
-      default: return <Navigate to="/login" />;
+      default: return <Navigate to="/welcome" />;
     }
   };
 
@@ -38,14 +39,16 @@ export default function App() {
 
   return (
     <Routes>
+      <Route path="/welcome" element={<Welcome />} />
       <Route path="/login" element={<Login />} />
       <Route path="/signup" element={<Signup />} />
-      <Route path="/" element={<PrivateRoute><Layout key={userKey}>{getDashboard()}</Layout></PrivateRoute>} />
+      <Route path="/dashboard" element={<PrivateRoute><Layout key={userKey}>{getDashboard()}</Layout></PrivateRoute>} />
       <Route path="/attendance/mark" element={<PrivateRoute roles={['admin', 'teacher']}><Layout key={userKey}><MarkAttendance /></Layout></PrivateRoute>} />
       <Route path="/classes" element={<PrivateRoute roles={['admin', 'teacher']}><Layout key={userKey}><ManageClasses /></Layout></PrivateRoute>} />
       <Route path="/users" element={<PrivateRoute roles={['admin']}><Layout key={userKey}><ManageUsers /></Layout></PrivateRoute>} />
       <Route path="/leave" element={<PrivateRoute><Layout key={userKey}><LeaveRequests /></Layout></PrivateRoute>} />
       <Route path="/reports" element={<PrivateRoute roles={['admin', 'teacher']}><Layout key={userKey}><Reports /></Layout></PrivateRoute>} />
+      <Route path="/" element={user ? <Navigate to="/dashboard" replace /> : <Navigate to="/welcome" replace />} />
       <Route path="*" element={<Navigate to="/" replace />} />
     </Routes>
   );

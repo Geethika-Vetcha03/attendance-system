@@ -1,10 +1,13 @@
 import { useState, useEffect } from 'react';
-import { useNavigate, Link } from 'react-router-dom';
+import { useNavigate, Link, useLocation } from 'react-router-dom';
 import { authApi } from '../services/api';
 import { useAuth } from '../context/AuthContext';
 
 export default function Signup() {
-  const [form, setForm] = useState({ name: '', email: '', password: '', confirmPassword: '', phone: '', role: 'student' });
+  const location = useLocation();
+  const preSelectedRole = (location.state as any)?.role || 'student';
+  
+  const [form, setForm] = useState({ name: '', email: '', password: '', confirmPassword: '', phone: '', role: preSelectedRole });
   const [error, setError] = useState('');
   const [success, setSuccess] = useState('');
   const navigate = useNavigate();

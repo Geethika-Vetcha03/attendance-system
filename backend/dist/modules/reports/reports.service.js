@@ -44,13 +44,16 @@ var __metadata = (this && this.__metadata) || function (k, v) {
 var __param = (this && this.__param) || function (paramIndex, decorator) {
     return function (target, key) { decorator(target, key, paramIndex); }
 };
+var __importDefault = (this && this.__importDefault) || function (mod) {
+    return (mod && mod.__esModule) ? mod : { "default": mod };
+};
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.ReportsService = void 0;
 const common_1 = require("@nestjs/common");
 const typeorm_1 = require("@nestjs/typeorm");
 const typeorm_2 = require("typeorm");
 const ExcelJS = __importStar(require("exceljs"));
-const PDFDocument = __importStar(require("pdfkit"));
+const pdfkit_1 = __importDefault(require("pdfkit"));
 const attendance_entity_1 = require("../../entities/attendance.entity");
 const user_entity_1 = require("../../entities/user.entity");
 let ReportsService = class ReportsService {
@@ -120,7 +123,7 @@ let ReportsService = class ReportsService {
         const end = query.endDate ? new Date(query.endDate) : new Date();
         const report = await this.getReportByRange(start, end, query.classId);
         return new Promise((resolve) => {
-            const doc = new PDFDocument();
+            const doc = new pdfkit_1.default();
             const chunks = [];
             doc.on('data', (chunk) => chunks.push(chunk));
             doc.on('end', () => resolve(Buffer.concat(chunks)));
