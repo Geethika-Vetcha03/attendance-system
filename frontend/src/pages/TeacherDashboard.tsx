@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import { Link, useSearchParams } from 'react-router-dom';
-import { classesApi, leaveApi, attendanceApi, authApi } from '../services/api';
+import { classesApi, leaveApi, attendanceApi, authApi, usersApi } from '../services/api';
 import { Class, LeaveRequest, User } from '../types';
 
 interface StudentWithAttendance extends User {
@@ -19,13 +19,15 @@ export default function TeacherDashboard() {
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedStudent, setSelectedStudent] = useState<StudentWithAttendance | null>(null);
   const [showAddStudent, setShowAddStudent] = useState(false);
-  const [studentForm, setStudentForm] = useState({ name: '', email: '', password: '', classId: '' });
+  const [unassignedStudents, setUnassignedStudents] = useState<User[]>([]);
+  const [selectedStudentId, setSelectedStudentId] = useState('');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
   const [success, setSuccess] = useState('');
 
   useEffect(() => {
     loadData();
+    loadUnassignedStudents();
   }, []);
 
   const loadData = async () => {
@@ -38,6 +40,17 @@ export default function TeacherDashboard() {
       setPendingLeaves(leavesRes.data);
     } catch (err) {
       console.error('Error loading data:', err);
+    }
+  };
+
+  const loadUnassignedStudents = async () => {
+    try {
+      const res = await usersApi.getAll('student');
+      // Filter students who don't have a class assigned
+      const unassigned = res.data.filter((student: User) => !student.classId);
+      setUnassignedStudents(unassigned);
+    } catch (err) {
+      console.error('Error loading unassigned students:', err);
     }
   };
 
@@ -79,23 +92,29 @@ export default function TeacherDashboard() {
     setError('');
     setSuccess('');
     
-    const classId = selectedClass || studentForm.classId;
+    const classId = selectedClass;
     if (!classId) {
       setError('Please select a class first');
+      return;
+    }
+
+    if (!selectedStudentId) {
+      setError('Please select a student to assign');
       return;
     }
     
     setLoading(true);
     try {
-      await authApi.register({ ...studentForm, classId, role: 'student' });
-      setStudentForm({ name: '', email: '', password: '', classId: '' });
+      await usersApi.assignClass(selectedStudentId, classId);
+      setSelectedStudentId('');
       setShowAddStudent(false);
-      setSuccess('Student added successfully!');
+      setSuccess('Student assigned to class successfully!');
       loadData();
+      loadUnassignedStudents();
       if (selectedClass) loadStudents(selectedClass);
       setTimeout(() => setSuccess(''), 3000);
     } catch (err: any) {
-      setError(err.response?.data?.message || 'Failed to add student');
+      setError(err.response?.data?.message || 'Failed to assign student');
     }
     setLoading(false);
   };
@@ -226,7 +245,7 @@ export default function TeacherDashboard() {
                 className="btn btn-primary" 
                 onClick={() => setShowAddStudent(!showAddStudent)}
               >
-                {showAddStudent ? '✕ Cancel' : '➕ Add Student'}
+                {showAddStudent ? '✕ Cancel' : '➕ Assign Student'}
               </button>
             )}
           </div>
@@ -234,43 +253,37 @@ export default function TeacherDashboard() {
           {/* Add Student Form */}
           {showAddStudent && (
             <div className="card mb-4">
-              <h3 style={{ marginBottom: '20px' }}>🎓 Add New Student {selectedClass && `to ${classes.find(c => c.id === selectedClass)?.name || ''}`}</h3>
+              <h3 style={{ marginBottom: '20px' }}>🎓 Assign Student to {classes.find(c => c.id === selectedClass)?.name || 'Class'}</h3>
               <form onSubmit={handleAddStudent}>
-                <div className="grid grid-3 gap-2">
-                  <div className="form-group">
-                    <label>👤 Student Name *</label>
-                    <input 
-                      value={studentForm.name} 
-                      onChange={e => setStudentForm({ ...studentForm, name: e.target.value })} 
-                      placeholder="e.g., John Doe" 
-                      required 
-                    />
-                  </div>
-                  <div className="form-group">
-                    <label>📧 Email *</label>
-                    <input 
-                      type="email"
-                      value={studentForm.email} 
-                      onChange={e => setStudentForm({ ...studentForm, email: e.target.value })} 
-                      placeholder="e.g., student@college.com" 
-                      required 
-                    />
-                  </div>
-                  <div className="form-group">
-                    <label>🔒 Password *</label>
-                    <input 
-                      type="password"
-                      value={studentForm.password} 
-                      onChange={e => setStudentForm({ ...studentForm, password: e.target.value })} 
-                      placeholder="Min 6 characters" 
-                      required 
-                      minLength={6}
-                    />
-                  </div>
+                <div className="form-group" style={{ marginBottom: '20px' }}>
+                  <label>👤 Select Student *</label>
+                  <select 
+                    value={selectedStudentId} 
+                    onChange={e => setSelectedStudentId(e.target.value)} 
+                    required
+                    style={{ padding: '12px 15px', fontSize: '14px' }}
+                  >
+                    <option value="">-- Select a student --</option>
+                    {unassignedStudents.map(student => (
+                      <option key={student.id} value={student.id}>
+                        {student.name} ({student.email})
+                      </option>
+                    ))}
+                  </select>
+                  {unassignedStudents.length === 0 && (
+                    <p style={{ color: '#f59e0b', fontSize: '13px', marginTop: '8px' }}>
+                      ℹ️ No unassigned students available. Students must sign up first before being assigned to a class.
+                    </p>
+                  )}
                 </div>
-                <button type="submit" className="btn btn-primary" disabled={loading}>
-                  {loading ? '⏳ Adding...' : '💾 Add Student'}
-                </button>
+                <div className="flex gap-2">
+                  <button type="submit" className="btn btn-primary" disabled={loading || unassignedStudents.length === 0}>
+                    {loading ? '⏳ Assigning...' : '💾 Assign Student'}
+                  </button>
+                  <button type="button" className="btn btn-secondary" onClick={() => setShowAddStudent(false)}>
+                    Cancel
+                  </button>
+                </div>
               </form>
             </div>
           )}
