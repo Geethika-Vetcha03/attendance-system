@@ -6,12 +6,9 @@ import { AppModule } from './app.module';
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
 
+  // CORS FIX
   app.enableCors({
-    origin: [
-      'http://localhost:5173',
-      'http://localhost:3000',
-      'https://attendance-system-frontend-c2d1.onrender.com'
-    ],
+    origin: true,
     credentials: true,
   });
 
